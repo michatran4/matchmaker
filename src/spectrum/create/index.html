@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Question Maker</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="./answers.js" defer></script>
+        <script src="./submit.js" defer></script>
+    </head>
+    <body>
+        <span>
+            <h1>Question Maker</h1>
+        </span>
+        <label for="question">Question:</label>
+        <input type="text" id="question" name="question"><br><br>
+        
+        <div class="spectrum" style="display:flex"></div> <!-- columns -->
+
+        <label for="answer-box">Add answer:</label>
+        <input type="text" id="answer-box" name="answer-box">
+        <input type="submit" id="addAnswer" value="Add Answer" onclick="createAnswer()"><br><br>
+        <input type="submit" id="submit" value="Submit" onclick="submitAnswers()">
+    </body>
+</html>
