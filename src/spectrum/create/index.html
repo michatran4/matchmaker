@@ -10,14 +10,17 @@
         <span>
             <h1>Question Maker</h1>
         </span>
-        <label for="question">Question:</label>
-        <input type="text" id="question" name="question"><br><br>
-        
-        <div class="spectrum" style="display:flex"></div> <!-- columns -->
+        <input type="submit" id="createQuestion" value="Add question">
+        <div class="container">
+            <label for="question">Question:</label>
+            <input type="text" id="question" name="question"><br><br>
+            
+            <div class="spectrum" style="display:flex"></div> <!-- columns -->
 
-        <label for="answer-box">Add answer:</label>
-        <input type="text" id="answer-box" name="answer-box">
-        <input type="submit" id="addAnswer" value="Add Answer" onclick="createAnswer()"><br><br>
-        <input type="submit" id="submit" value="Submit" onclick="submitAnswers()">
+            <label for="answer-box">Add answer:</label>
+            <input type="text" id="answer-box" name="answer-box">
+            <input type="submit" id="addAnswer" value="Add Answer" onclick="createAnswer(this)"><br><br>
+            <input type="submit" id="submit" value="Submit" onclick="submitAnswers()">
+        </div>
     </body>
 </html>

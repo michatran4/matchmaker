@@ -1,16 +1,11 @@
 const answers = document.querySelectorAll('.answer')
-const spectrum = document.querySelector('.spectrum')
+const containers = document.querySelectorAll('.container')
 const answer_box = document.querySelector('#answer-box')
 const create_answer = document.querySelector("#addAnswer")
 
-function createAnswer(value) {
-    if (value == null) { // for the submit button; no provided value. just an onClick.
-        // However, this will be reused for loading up answers, too.
-        value = answer_box.value;
-    }
+function createAnswer(submit_button) { // this is creating only for the submit button
     const answer = document.createElement('p');
     answer.classList.add('answer');
-    answer.innerHTML = value;
     answer.draggable = true;
     answer.addEventListener('dragstart', () => {
         answer.classList.add('dragging')
@@ -18,19 +13,23 @@ function createAnswer(value) {
     answer.addEventListener('dragend', () => {
         answer.classList.remove('dragging')
     })
-    spectrum.append(answer);
+    let container = submit_button.parentNode;
+    answer.innerHTML = container.querySelector("#answer-box").value;
+    container.querySelector('.spectrum').append(answer);
 }
 
-// ordering functionality
-spectrum.addEventListener('dragover', e => {
-    e.preventDefault()
-    const afterElement = getDragAfterElement(spectrum, e.clientX)
-    const draggable = document.querySelector('.dragging')
-    if (afterElement == null) {
-        spectrum.appendChild(draggable)
-    } else {
-        spectrum.insertBefore(draggable, afterElement)
-    }
+containers.forEach(container => {
+    const spectrum = container.querySelector('.spectrum')
+    spectrum.addEventListener('dragover', e => {
+        e.preventDefault()
+        const afterElement = getDragAfterElement(spectrum, e.clientX)
+        const draggable = document.querySelector('.dragging')
+        if (afterElement == null) {
+            spectrum.appendChild(draggable)
+        } else {
+            spectrum.insertBefore(draggable, afterElement)
+        }
+    })
 })
 
 function getDragAfterElement(container, x) {
