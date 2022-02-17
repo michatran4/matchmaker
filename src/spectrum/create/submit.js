@@ -1,3 +1,16 @@
+function download(data, fileName, type="text/plain") {
+    const a = document.createElement("a");
+    a.style.display = "none";
+    document.body.appendChild(a);
+
+    a.href = window.URL.createObjectURL(new Blob([data], {type}));
+    a.setAttribute("download", fileName);
+    a.click(); // simulate a click
+
+    window.URL.revokeObjectURL(a.href);
+    document.body.removeChild(a);
+}
+
 const submitAnswers = () => {
     let output = '';
     let flag = false;
@@ -23,6 +36,15 @@ const submitAnswers = () => {
             + '\n\n';
     })
     if (flag) return;
-    alert('Successfully submitted your proposed answers!');
-    console.log(output); // TODO, submit to a server
+    download(output.substring(0, output.length - 1), 'ans.dat'); // rid of the last new line
 }
+
+var txt = '';
+var xmlhttp = new XMLHttpRequest();
+xmlhttp.onreadystatechange = function(){
+  if(xmlhttp.status == 200 && xmlhttp.readyState == 4){
+    txt = xmlhttp.responseText;
+  }
+};
+xmlhttp.open("GET","ans.dat",true);
+xmlhttp.send();
