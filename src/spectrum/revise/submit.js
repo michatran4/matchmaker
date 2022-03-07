@@ -36,5 +36,5 @@ const submitAnswers = () => {
             + '\n\n';
     })
     if (flag) return;
-    download(output.substring(0, output.length - 1), 'ans.dat'); // rid of the last new line
+    download(output.substring(0, output.length - 1), 'ans-revised.dat'); // rid of the last newline
 }

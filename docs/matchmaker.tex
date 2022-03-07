@@ -1,0 +1,72 @@
+\documentclass[12pt]{article}
+
+\title{matchmaker-tm}
+\author{Michael Tran}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Outline}
+
+This outlines the features that matchmaker-tm will have.
+
+\subsection{Gathering questions}
+People will be matched based on their responses to high quality questions. These questions should have at least two answers that can be distinctive of preferences.
+
+\subsection{Gathering answers}
+Answers should be sorted on a spectrum. Those that choose the most left answer should be very incompatible with those that choose the most right answer. This could be subjective, so I will have this spectrum crowdsourced. Users that participate in answering questions should provide their own question and answers.
+
+\subsection{Interface}
+Representatives will generate a token that will act as the user's login. This token will be used to access the panel where answers will be selected, and where a custom question will be submitted for review to add on to the current list of questions.
+
+\subsection{Computing answers}
+After a solid amount of data is collected, each user will have their answers compared against other user's answers. Each answer has a difference from 0 to 1. A larger difference represents incompatibility, and a smaller difference represents compatibility. However, one question isn't indicative of everything, so the averages of the differences are calculated and laid out onto a spreadsheet.
+
+After averages are compiled, preferences will be sorted from the smallest difference to the largest difference. A stable matching algorithm will then be applied to matchmake users.
+
+\section{Spectrum Analysis}
+Answers will be laid out on a spectrum, and this will allow for some easy math. This approach works because if a question has only two choices, then it implies that the two choices are polar opposites of each other. This will be perfectly represented with a large difference of 1 between adjacent choices. However, a question with one hundred choices will have less of an impact, as differences between adjacent choices will only be 0.01.
+
+\subsection{Q/A Formatting}
+Questions and answers will be formatted like the following example:
+x
+\begin{verbatim}
+    What animal do you like as a pet?
+    Cats | Birds | Dogs
+\end{verbatim}
+
+Vertical bars will act as delimiters. Answers will be loaded from this format, and proposed answers will be submitted in this format. Ultimately, I will gather data from all the spectrums and create the most appropriate one.
+
+\subsection{Creating an interface for surveying content}
+Vanilla javascript and html should allow for dragging and dropping answers into a row. This interface will allow for ease of creating survey questions. Collecting answers will be done before the matchmaking is open to everyone.
+
+Submitting answers just combines the questions and answers together with a newline. Javascript already sorts the answers, so they are all looped through in order.
+
+\subsection{Revising survey content}
+Questions should be revised after they are made. This is done by providing the same question maker, except with a populated form; questions and answers will be pre-filled. This allows for adding of answers and possible revision of the question.
+
+Populating the form is done with providing a file. I will get diffs manually to accept revisions.
+
+\section{Answering survey questions}
+Proposed spectrums will be compared and I will ultimately decide upon the best one for people to answer to.
+
+\subsection{Loading questions}
+As stated, this is the format:
+\begin{verbatim}
+    What animal do you like as a pet?
+    Cats | Birds | Dogs
+\end{verbatim}
+
+A simple html form will load up these sets of data and have users click their answer.
+This form will be generated on my machine.
+
+\subsection{Output of answers}
+Questions will be in the same order for every person. Additionally, the survey will have a final revision before it is released. This could simply return a list of numbers. The list of numbers will be the answers in order, and each answer is an answer to the question in its corresponding index.
+
+Data will be manually entered with manual diff comparisons.
+
+\section{Data Computation}
+
+
+\end{document}
