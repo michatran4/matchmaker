@@ -11,7 +11,7 @@ body {
 }
 
 .answer {
-  padding: 1rem;
+  padding: 1px;
   background-color: white;
   border: 1px solid black;
   cursor: move;
@@ -19,4 +19,8 @@ body {
 
 .answer.dragging {
   opacity: .5;
+}
+
+p {
+  font-size: 12px;
 }

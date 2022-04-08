@@ -3,3 +3,5 @@ todo
 *.pdf
 *.gz
 node_modules
+data
+out

@@ -4,8 +4,8 @@ const containers = document.querySelectorAll('.container')
 function createAnswer(submit_button) { // this is creating only for the submit button
     let container = submit_button.parentNode;
     const text = container.querySelector('.answer-box').value;
-    if (text == '') return alert('You cannot add an empty answer');
-    const answer = document.createElement('p');
+    if (text == '') return alert('You cannot add an empty answer.');
+    const answer = document.createElement('span');
     answer.classList.add('answer');
     answer.draggable = true;
     answer.addEventListener('dragstart', () => {
@@ -14,6 +14,7 @@ function createAnswer(submit_button) { // this is creating only for the submit b
     answer.addEventListener('dragend', () => {
         answer.classList.remove('dragging')
     })
+    answer.contentEditable = true;
     answer.innerHTML = text;
     container.querySelector('.spectrum').append(answer);
 }

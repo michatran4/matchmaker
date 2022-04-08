@@ -1,4 +1,23 @@
 /**
+ * Save the survey answers. TODO this is temporary, just for testing the matchmaking
+ * @param {string} data
+ * @param {string} fileName
+ * @param {string} type
+ */
+ function download(data, fileName, type="text/plain") {
+    const a = document.createElement("a");
+    a.style.display = "none";
+    document.body.appendChild(a);
+
+    a.href = window.URL.createObjectURL(new Blob([data], {type}));
+    a.setAttribute("download", fileName);
+    a.click(); // simulate a click
+
+    window.URL.revokeObjectURL(a.href);
+    document.body.removeChild(a);
+}
+
+/**
  * Turns survey answers into a list of the indices of the selected answers.
  */
 function submit() {
@@ -25,5 +44,6 @@ function submit() {
         return;
     }
     output = output.substring(0, output.length - 1); // remove last comma
-    console.log(output); // TODO submit
+    let random = Math.random().toString(36).substring(3);
+    download(output, random + ".txt"); // TODO submit. Might need to convert to JSON
 }

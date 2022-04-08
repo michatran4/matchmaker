@@ -1,3 +1,9 @@
+/**
+ * Save the answer data.
+ * @param {string} data
+ * @param {string} fileName
+ * @param {string} type
+ */
 function download(data, fileName, type="text/plain") {
     const a = document.createElement("a");
     a.style.display = "none";
@@ -9,6 +15,15 @@ function download(data, fileName, type="text/plain") {
 
     window.URL.revokeObjectURL(a.href);
     document.body.removeChild(a);
+}
+
+/**
+ * Properly trim a string to prevent empty answers.
+ * @param {string} str 
+ * @returns the trimmed string
+ */
+function trim(str) {
+    return str.replace(/&nbsp;/g, ' ').trim();
 }
 
 const submitAnswers = () => {
@@ -28,8 +43,15 @@ const submitAnswers = () => {
         }
         let answer_output = '';
         answers.forEach(answer => { // concatenate all answers with a delimiter
-            answer_output += answer.innerHTML + ' | ';
+            if (flag) return;
+            let ans = trim(answer.innerHTML);
+            if (ans.length == 0) {
+                flag = true;
+                return alert("You cannot have an empty answer.");
+            }
+            answer_output += ans + ' | ';
         })
+        if (flag) return;
         output += question.value
             + '\n'
             + answer_output.substring(0, answer_output.length - 3)

@@ -3,6 +3,9 @@
  * This is to be moved into the directory with submit.js and style.css.
  */
 
+const read = 'ans.dat'; // answer file to read from
+const write = 'index.html'; // survey file
+const counts = 'survey.dat'; // survey answer counts file
 const fs = require('fs');
 const pretty = require('pretty'); // beautifies HTML
 
@@ -18,6 +21,8 @@ let html =
   <label>Name:</label>
   <input id="name">
 `;
+
+let countList = "";
 
 let index = 0;
 /**
@@ -40,7 +45,7 @@ function addSet(question, answers) {
  * @returns the sets of questions and answers
  */
 function getData() {
-    let data = fs.readFileSync('ans.dat', 'utf8');
+    let data = fs.readFileSync(read, 'utf8');
     data = data.substring(0, data.length - 1); // remove extra newline
     return data.split("\n\n"); // sets are separated by 2 newlines
 }
@@ -52,7 +57,9 @@ function writeFile() {
     html += `<br>
     <input type="submit" id="submit" value="Submit" onclick="submit()">
     </html>\n`
-    fs.writeFile('index.html', pretty(html), (e)=>{if (e) console.log(e)})
+    countList = countList.substring(0, countList.length - 1);
+    fs.writeFile(write, pretty(html), (e)=>{if (e) console.log(e)})
+    fs.writeFile(counts, countList, (e)=>{if (e) console.log(e)})
 }
 
 /**
@@ -65,6 +72,7 @@ async function generateHTML() {
         let question = set.split("\n")[0];
         let answers = set.split("\n")[1].split(" | ");
         addSet(question, answers);
+        countList += answers.length + ",";
     })
     writeFile();
 }
