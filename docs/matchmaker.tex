@@ -13,7 +13,7 @@ This outlines the features that matchmaker-tm will have.
 \subsection{Gathering questions}
 People will be matched based on their responses to high quality questions. These
 questions will have at least two answers that can be distinctive of
-preferences.
+compatibility.
 
 \subsection{Gathering answers}
 Answers should be sorted on a spectrum. Those that choose the most left answer
@@ -112,6 +112,11 @@ Then, each users' choice is an index of an answer for each question. The choice
 will have a calculated value that is the index divided by the difference between
 the number of answers and 1. Answer indices start at 0, so this will allow for
 answers on opposite ends of a spectrum to have a difference of 1.
+
+Users that participate first in the matchmaker will be prioritized. This can be
+done by making the file names alphabetical as Java will read the files
+alphabetically. The users created from the files are added to the queue in
+order.
 
 \subsection{Data Output}
 The final data spreadsheet will be a table with each person's compatibility with

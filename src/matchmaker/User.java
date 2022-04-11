@@ -24,10 +24,21 @@ public class User {
         return name;
     }
 
+    /**
+     * Returns the answer index for a question, so its value can be calculated.
+     * @param index the question number
+     * @return the answer index for the question index
+     */
     public int getAnswer(int index) {
         return answers[index];
     }
 
+    /**
+     * Determines if this user already has a preference calculated for the other user.
+     * The preferences towards each other is the same, so no need to recalculate.
+     * @param user the other user
+     * @return if the current user already has his preference calculated
+     */
     public boolean preferenceExists(User user) {
         for (Preference preference: preferences) {
             if (preference.user.name.equals(user.name)) {
@@ -37,11 +48,17 @@ public class User {
         return false;
     }
 
+    /**
+     * Adds a preference for another user.
+     */
     public void add(User user, double preference) {
         Preference p = new Preference(user, preference);
         preferences.add(p);
     }
 
+    /**
+     * Gets the user's preference for another user.
+     */
     public double getPreference(User user) {
         for (Preference preference: preferences) {
             if (preference.user.equals(user)) {
@@ -51,6 +68,9 @@ public class User {
         throw new IllegalArgumentException();
     }
 
+    /**
+     * @return the preferences, containing a user object tied to a preference value
+     */
     public LinkedList<Preference> getPreferences() {
         return new LinkedList<>(preferences);
     }
@@ -95,6 +115,7 @@ public class User {
         public int compareTo(Preference other) {
             if (Double.compare(value, other.value) == 0) {
                 // second comparator for tree set. include duplicate averages, but not names
+                // must have this or the tree set won't add it
                 return user.getName().compareTo(other.user.getName());
             }
             return Double.compare(value, other.value);
