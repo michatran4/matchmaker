@@ -1,5 +1,7 @@
 package matchmaker;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -30,7 +32,7 @@ public class Matchmaker {
         }
         // create user objects from survey input
         users = new LinkedList<>();
-        try (Stream<Path> paths = Files.walk(Paths.get("data/users"))) {
+        try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
             paths.filter(Files::isRegularFile).forEach(path -> {
                 try {
                     String[] input = Files.readString(path, StandardCharsets.US_ASCII).split("\n");
@@ -44,6 +46,18 @@ public class Matchmaker {
             });
         }
         matches = new HashSet<>();
+    }
+
+    public static void main(String[] args) throws IOException {
+        Matchmaker mm = new Matchmaker("./data/survey.dat", "./data/users");
+        mm.calculatePreferences();
+        mm.stableMatch();
+        System.out.println("Matches found:");
+        for (Match m: mm.matches) {
+            System.out.println(m);
+        }
+        System.out.println();
+        mm.write("data-out");
     }
 
     /**
@@ -76,6 +90,7 @@ public class Matchmaker {
 
     /**
      * Matches two users, breaking off current matches if necessary.
+     *
      * @return the list containing users that are now heartbroken and need a new match
      */
     public LinkedList<User> match(User one, User two) {
@@ -107,18 +122,18 @@ public class Matchmaker {
     /**
      * Applies a stable matching algorithm to match users according to their preferences.
      * Users that are already matched will still try to match with their own preferences.
-     *
+     * <p>
      * User C goes through all of their preferences, each labeled as A.
-     *  User A may or may not already be matched to a partner B.
-     *  User C may or may not already be matched to a partner D.
-     *  - It is important to still go through C's preferences, as a possible better match can be
-     *  made.
-     *  There are four cases to check:
-     *   - If they are both not taken, then match them both. Only remove C from the queue because
-     *   A will try again.
-     *   - If A is taken, then A must prefer C over B.
-     *   - If C is taken, then C must prefer A over D.
-     *   - If they are both taken, then they must prefer each other over their current matches.
+     * User A may or may not already be matched to a partner B.
+     * User C may or may not already be matched to a partner D.
+     * - It is important to still go through C's preferences, as a possible better match can be
+     * made.
+     * There are four cases to check:
+     * - If they are both not taken, then match them both. Only remove C from the queue because
+     * A will try again.
+     * - If A is taken, then A must prefer C over B.
+     * - If C is taken, then C must prefer A over D.
+     * - If they are both taken, then they must prefer each other over their current matches.
      * To prevent an infinite loop, the average of differences MUST be LOWER.
      */
     public void stableMatch() {
@@ -156,7 +171,8 @@ public class Matchmaker {
                         LinkedList<User> unmatched = match(A, C);
                         free.addAll(unmatched);
                         break;
-                    } else {
+                    }
+                    else {
                         System.out.println("Unsuccessful match.");
                     }
                 }
@@ -173,7 +189,8 @@ public class Matchmaker {
                         LinkedList<User> unmatched = match(A, C);
                         free.addAll(unmatched);
                         break;
-                    } else {
+                    }
+                    else {
                         System.out.println("Unsuccessful match.");
                     }
                 }
@@ -205,7 +222,8 @@ public class Matchmaker {
                         LinkedList<User> unmatched = match(A, C);
                         free.addAll(unmatched);
                         break;
-                    } else {
+                    }
+                    else {
                         System.out.println("Unsuccessful match.");
                     }
                 }
@@ -226,27 +244,97 @@ public class Matchmaker {
     }
 
     /**
-     * Writes the output.
-     * The final data spreadsheet will be a table with each person's compatibility with one another.
-     * This spreadsheet will be kept private.
-     * Each person will receive an individual sheet with the person he had the
-     * lowest difference with, and the person he eventually got matched with after the stable
-     * matching algorithm is applied.
+     * Writes the output: spreadsheet and individual data.
+     * TODO should individuals know who they were most compatible with before matching?
      *
      * @param directory the directory to write the files to
      */
-    public void write(String directory) { // TODO
+    public void write(String directory) throws IOException {
+        writeCSV(directory);
+        writeIndividuals(directory);
     }
 
-    public static void main(String[] args) throws IOException {
-        Matchmaker mm = new Matchmaker("./data/survey.dat", "./data/users");
-        mm.calculatePreferences();
-        mm.stableMatch();
-        System.out.println("Matches found:");
-        for (Match m: mm.matches) {
-            System.out.println(m);
+    /**
+     * The final data spreadsheet will be a table with each person's compatibility with one another.
+     * This spreadsheet should be kept private.
+     */
+    private void writeCSV(String directory) throws IOException {
+        // manual CSV creation
+        HashMap<String, HashMap<String, Double>> map = new HashMap<>(); // preference map
+        for (User user: users) {
+            HashMap<String, Double> preferences = new HashMap<>();
+            LinkedList<User.Preference> list = user.getPreferences();
+            for (User.Preference preference: list) {
+                preferences.put(preference.user.getName(), preference.getValue());
+            }
+            map.put(user.getName(), preferences);
         }
-        mm.write("data-out");
+        String[][] csv = new String[users.size() + 1][];
+        for (int i = 0; i < csv.length; i++) { // initialize so no errors
+            csv[i] = new String[users.size() + 1];
+            Arrays.fill(csv[i], "");
+        }
+        // first column/row labels
+        csv[0][0] = "Name";
+        ArrayList<String> names = new ArrayList<>(map.keySet());
+        for (int i = 1; i <= names.size(); i++) {
+            csv[0][i] = names.get(i - 1);
+            csv[i][0] = names.get(i - 1);
+        }
+        for (int i = 1; i < csv.length; i++) {
+            for (int j = 1; j < csv[i].length; j++) {
+                String one = csv[0][i];
+                String two = csv[j][0];
+                if (!one.equals(two)) { // don't do preferences for one's self
+                    csv[i][j] = String.valueOf(map.get(one).get(two));
+                }
+            }
+        }
+        StringBuilder csvBuilder = new StringBuilder();
+        for (String[] array: csv) {
+            for (String s: array) {
+                csvBuilder.append(s).append(", ");
+            }
+            // remove the last comma
+            csvBuilder = new StringBuilder(csvBuilder.substring(0, csvBuilder.length() - 2));
+            csvBuilder.append("\n");
+            // remember that there are empty values for a user's preference for themselves;
+            // the last user will have an extra comma on purpose
+        }
+        System.out.println(csvBuilder);
+        File dir = new File(directory);
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        File file = new File(directory + "/data.csv");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        FileWriter writer = new FileWriter(file);
+        writer.write(csvBuilder.toString());
+        writer.close();
+    }
+
+    /**
+     * Writes the matchmaker's results for individuals.
+     * This is assumed to be used after the CSV is written. data-out should already be created.
+     * TODO contact information, and this should probably be a pretty HTML page
+     */
+    private void writeIndividuals(String directory) throws IOException {
+        File dir = new File(directory + "/users");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        for (Match match: matches) {
+            for (User user: match.getUsers()) {
+                User other = match.getOther(user);
+                File file = new File(directory + "/users/" + user.getName() + ".txt");
+                String output = String.format("You matched with %s!\n", other.getName()); // TODO
+                FileWriter writer = new FileWriter(file);
+                writer.write(output);
+                writer.close();
+            }
+        }
     }
 
     /**
@@ -295,7 +383,8 @@ public class Matchmaker {
             Match match = (Match) o;
             if (Objects.equals(a, match.a) && Objects.equals(b, match.b)) {
                 return true;
-            } else return Objects.equals(a, match.b) && Objects.equals(b, match.a);
+            }
+            else return Objects.equals(a, match.b) && Objects.equals(b, match.a);
         }
     }
 }

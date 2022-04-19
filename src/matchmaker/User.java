@@ -26,6 +26,7 @@ public class User {
 
     /**
      * Returns the answer index for a question, so its value can be calculated.
+     *
      * @param index the question number
      * @return the answer index for the question index
      */
@@ -36,6 +37,7 @@ public class User {
     /**
      * Determines if this user already has a preference calculated for the other user.
      * The preferences towards each other is the same, so no need to recalculate.
+     *
      * @param user the other user
      * @return if the current user already has his preference calculated
      */
@@ -97,8 +99,8 @@ public class User {
     }
 
     public static class Preference implements Comparable<Preference> {
-        public User user;
         private final double value;
+        public User user;
 
         public Preference(User u, double p) {
             user = u;

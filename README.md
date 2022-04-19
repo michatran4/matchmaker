@@ -31,3 +31,7 @@ directory.
 - User submissions should be moved to the `data/users` directory. 
 
 ### Matching
+Run `src/Matchmaker.java`. The output will be written to `data-out`.
+- There will be a spreadsheet of the preferences.
+- There will be information for each person regarding whom he/she matched with. The name of the 
+file will be the name of the person the information should be sent to.

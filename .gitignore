@@ -4,4 +4,5 @@ todo
 *.gz
 node_modules
 data
+data-out
 out
