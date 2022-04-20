@@ -3,6 +3,8 @@ package matchmaker;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -71,18 +73,23 @@ public class Matchmaker {
             for (User two: users) {
                 if (one != two && !one.preferenceExists(two)) {
                     // TODO: don't calculate preferences for the same gender
-                    double average = 0.0; // average of differences. will be same for user pairs
+                    BigDecimal average = new BigDecimal("0.0");
+                    // average of differences. will be same for user pairs
+                    // use big decimal for rounding to thousands
                     for (int i = 0; i < questions.size(); i++) {
                         int ans = questions.get(i); // number of answers for the question index
                         // calculate the value of each answer index, which will be used in a
                         // difference between two values
-                        double v = (double) (one.getAnswer(i)) / (ans - 1);
-                        double v2 = (double) (two.getAnswer(i)) / (ans - 1);
-                        double diff = Math.max(v, v2) - Math.min(v, v2);
-                        average += diff;
+                        BigDecimal v = BigDecimal.valueOf((double) one.getAnswer(i) / (ans - 1));
+                        BigDecimal v2 = BigDecimal.valueOf((double) two.getAnswer(i) / (ans - 1));
+                        // floating points are definitely needed
+                        BigDecimal diff = BigDecimal.valueOf(Math.abs(v.doubleValue() - v2.doubleValue()));
+                        average = average.add(diff);
                     }
-                    one.add(two, average / questions.size());
-                    two.add(one, average / questions.size());
+                    BigDecimal preference = average.divide(BigDecimal.valueOf(questions.size()), 3,
+                            RoundingMode.HALF_UP); // find the avg but scale to the thousandths
+                    one.add(two, preference.doubleValue());
+                    two.add(one, preference.doubleValue());
                 }
             }
         }
