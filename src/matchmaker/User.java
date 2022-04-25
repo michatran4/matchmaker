@@ -59,18 +59,6 @@ public class User {
     }
 
     /**
-     * Gets the user's preference for another user.
-     */
-    public double getPreference(User user) {
-        for (Preference preference: preferences) {
-            if (preference.user.equals(user)) {
-                return preference.value;
-            }
-        }
-        throw new IllegalArgumentException();
-    }
-
-    /**
      * @return the preferences, containing a user object tied to a preference value
      */
     public LinkedList<Preference> getPreferences() {
