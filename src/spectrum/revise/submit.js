@@ -36,26 +36,37 @@ const submitAnswers = () => {
             flag = true; // break out of looping through containers
             return alert('You must fill in the blanks for all questions.');
         }
-        const answers = container.querySelectorAll('.answer');
-        if (answers.length < 2) {
-            flag = true;
-            return alert('You must provide at least 2 answers to all questions.');
+        let containerIsSection = false;
+        if (container.querySelector('label').innerHTML.startsWith('Section:')) {
+            containerIsSection = true;
         }
         let answer_output = '';
-        answers.forEach(answer => { // concatenate all answers with a delimiter
-            if (flag) return;
-            let ans = trim(answer.innerHTML);
-            if (ans.length == 0) {
+        if (!containerIsSection) {
+            const answers = container.querySelectorAll('.answer');
+            if (answers.length < 2) {
                 flag = true;
-                return alert("You cannot have an empty answer.");
+                return alert('You must provide at least 2 answers to all questions.');
             }
-            answer_output += ans + ' | ';
-        })
+            answers.forEach(answer => { // concatenate all answers with a delimiter
+                if (flag) return;
+                let ans = trim(answer.innerHTML);
+                if (ans.length == 0) {
+                    flag = true;
+                    return alert("You cannot have an empty answer.");
+                }
+                answer_output += ans + ' | ';
+            })
+        }
         if (flag) return;
-        output += question.value
-            + '\n'
-            + answer_output.substring(0, answer_output.length - 3)
-            + '\n\n';
+        if (containerIsSection) {
+            output += question.value + '\n\n';
+        }
+        else {
+            output += question.value
+                + '\n'
+                + answer_output.substring(0, answer_output.length - 3)
+                + '\n\n';
+        }
     })
     if (flag) return;
     download(output.substring(0, output.length - 1), 'ans-revised.dat'); // rid of the last newline

@@ -101,6 +101,25 @@ function createSet(q, answer_list) {
     populateAnswers(spectrum, answer_list);
 }
 
+/**
+ * Create a section label.
+ */
+function createSection(q) {
+    const container = document.createElement('div');
+    container.classList.add('container');
+    
+    const qLabel = document.createElement('label');
+    qLabel.htmlFor = 'question';
+    qLabel.innerHTML = 'Section: '
+    const question = document.createElement('input');
+    question.classList.add('question');
+    question.value = q;
+
+    container.appendChild(qLabel);
+    container.appendChild(question);
+    document.body.appendChild(container);
+}
+
 function openFile() {
     var fileSelector = document.createElement('input');
     fileSelector.setAttribute('type', 'file');
@@ -111,11 +130,19 @@ function openFile() {
         reader.readAsText(file,'UTF-8');
         reader.onload = readerEvent => {
             let content = readerEvent.target.result.split("\n\n");
-            content.forEach(qa => {
-                qa = qa.split("\n");
-                let question = qa[0];
-                let answers = qa[1].split(" | ");
-                createSet(question, answers);
+            content = content.filter(function(value, index, arr) {
+                return value != ''; // extra new lines possibly, prune just in case
+            })
+            content.forEach(str => {
+                if (str.includes("\n") && !str.endsWith("\n")) { // anomaly for last line
+                    str = str.split("\n");
+                    let question = str[0];
+                    let answers = str[1].split(" | ");
+                    createSet(question, answers);
+                }
+                else {
+                    createSection(str);
+                }
             });
         }
     });

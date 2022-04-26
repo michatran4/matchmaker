@@ -92,3 +92,18 @@ function createQuestion() {
 
     addAnswer.onclick = () => createAnswer(addAnswer);
 }
+
+function createSection() {
+    const container = document.createElement('div');
+    container.classList.add('container');
+    
+    const qLabel = document.createElement('label');
+    qLabel.htmlFor = 'question';
+    qLabel.innerHTML = 'Section: '
+    const question = document.createElement('input');
+    question.classList.add('question');
+
+    container.appendChild(qLabel);
+    container.appendChild(question);
+    document.body.appendChild(container);
+}
