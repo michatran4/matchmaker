@@ -10,18 +10,19 @@
         <span>
             <h1>Question Maker</h1>
         </span>
-        <input type="submit" id="createQuestion" onclick="createQuestion()" value="Add question">
-        <input type="submit" id="createSection" onclick="createSection()" value="Add section">
+        <input type="submit" id="file" value="Open File" onclick="openFile()">
+        <input type="submit" id="createQuestion" onclick="createSet('', null)" value="Add question">
+        <input type="submit" id="createSection" onclick="createSection('')" value="Add section">
         <input type="submit" id="submit" value="Submit" onclick="submitAnswers()">
-        <div class="container">
+        <div class="container" draggable="true">
             <label for="question">Question:</label>
-            <input type="text" class="question" id="question" name="question"><br><br>
+            <input type="text" class="question" id="question" name="question">
             
             <div class="spectrum" style="display:flex"></div> <!-- columns -->
 
             <label for="answer-box">Add answer:</label>
             <input class="answer-box" name="answer-box">
-            <input type="submit" class="answer-button" value="Add Answer" onclick="createAnswer(this)"><br><br>
+            <input type="submit" class="answer-button" value="Add Answer" onclick="createAnswer(this)">
         </div>
     </body>
 </html>

@@ -10,17 +10,20 @@
 \section{Outline}
 This outlines the features that matchmaker-tm will have.
 
-\subsection{Gathering questions}
+\subsection{Gathering Questions and Answeers}
 People will be matched based on their responses to high quality questions. These
 questions will have at least two answers that can be distinctive of
 compatibility.
 
-\subsection{Gathering answers}
 Answers should be sorted on a spectrum. Those that choose the most left answer
 should be very incompatible with those that choose the most right answer. This
 could be subjective, so I will have this spectrum crowdsourced.
 
-\subsection{Interface}
+The answers should be sortable on the spectrum. The containers should not be
+sortable; this will create conflicts between where the dragged object should be
+placed.
+
+\subsection{Representative Interface}
 Representatives will generate a token that will act as the user's login. This
 token will be used to access the panel where answers will be selected. All
 questions will already be final. The token will be null once the survey is
@@ -73,15 +76,11 @@ a row, and javascript automatically sorts the answers. This interface will
 allow for ease of creating survey questions and submission of the answers.
 Collecting answers will be done before the matchmaking is open to everyone.
 
-\subsection{Revising survey content}
-Questions should be revised after they are made. This is done by providing the
-same question maker, except with a populated form; questions and answers will be
-pre-filled. This allows for adding of answers and possible revision of the
-question.
-
-Populating the form is done with providing a file, and the form will be
+Questions should be revised after they are made. Questions and answers can
+populate the form with a previous answer file. This allows for adding of
+answers and possible revision of the question. The survey form will be
 generated with nodejs. I will get diffs manually to accept revisions to the
-final survey.
+final version.
 
 \section{Answering survey questions}
 Proposed spectrums will be compared and I will ultimately decide upon the best
