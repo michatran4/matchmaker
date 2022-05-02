@@ -31,7 +31,9 @@ containers.forEach(container => {
         const afterElement = getDragAfterElement(spectrum, e.clientX);
         const draggable = document.querySelector('.dragging')
         if (afterElement == null) {
-            spectrum.appendChild(draggable);
+            if (draggable != null) {
+                spectrum.appendChild(draggable);
+            }
         } else {
             spectrum.insertBefore(draggable, afterElement);
         }
@@ -87,7 +89,9 @@ function getDragAfterElement(container, x) {
         const afterElement = getDragAfterElement(spectrum, e.clientX)
         const draggable = document.querySelector('.dragging')
         if (afterElement == null) {
-            spectrum.appendChild(draggable)
+            if (draggable != null) {
+                spectrum.appendChild(draggable)
+            }
         } else {
             spectrum.insertBefore(draggable, afterElement)
         }
