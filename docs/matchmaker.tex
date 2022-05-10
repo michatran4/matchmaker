@@ -19,112 +19,126 @@ Answers should be sorted on a spectrum. Those that choose the most left answer
 should be very incompatible with those that choose the most right answer. This
 could be subjective, so I will have this spectrum crowdsourced.
 
-The answers should be sortable on the spectrum. The containers should not be
-sortable; this will create conflicts between where the dragged object should be
-placed.
+The answers should be sortable on the spectrum. \textbf{The containers should
+not be sortable}; this will create conflicts between where the dragged object
+should be placed.
 
 \subsection{Representative Interface}
-Representatives will generate a token that will act as the user's login. This
-token will be used to access the panel where answers will be selected. All
-questions will already be final. The token will be null once the survey is
-submitted.
+Representatives will be allowed to edit the Google Form containing the survey.
+Representatives will authenticate survey partcipiants by allowing the user's
+student ID to have access to the survey. All questions will already be final at
+the time of the surveying. Users will have only one survey submission.
 
-subsection{Computing answers}
-After a solid amount of data is collected, each user will have their answers
-compared against other user's answers. Each answer has a difference from 0 to 1.
-A larger difference represents incompatibility, and a smaller difference
-represents compatibility. However, one question isn't indicative of everything,
-so the averages of the differences are calculated and laid out onto a
-spreadsheet. A person that has a smaller difference for a preference for another 
-person is more compatible with them.
+\subsection{Computing answers}
+After the matchmaker has been available to the public for a good amount of time
+and a solid amount of data is collected, each user will have their answers
+compared against other user's answers. Answers have a difference from 0 to
+1. A larger difference represents incompatibility, and a smaller difference
+represents compatibility. This is done by comparing where the answers are
+located on the spectrum. As stated, \textit{those that choose the most left answer
+should be very incompatible with those that choose the most right answer.}
 
-After averages are compiled, preferences will be sorted from the smallest
-difference to the largest difference. A stable matching algorithm will then be
-applied to matchmake users. An additional filter will include a preference for
-gender.
+However, one question isn't indicative of everything, so the averages of the
+differences are calculated and laid out onto a spreadsheet. A person that has a
+smaller difference for a preference for another person is more compatible with
+them. Additionally, question weights will be included for questions that are
+mainly for fun and don't truly indicate incompatibility.
+
+After averages are compiled, a user's preferences will ultimately be sorted from
+the smallest difference to the largest difference.
 
 \subsection{Data required}
-The data I will need is each person's name, contact information, and answers to
-questions. This can easily be stored in a database. Information may be encrypted
-with GPG.
+In the survey form, each person will need to provide:
+\begin{itemize}
+    \item one's name,
+    \item one's contact information for the matchmaker results to be reported to,
+    \item one's contact information to be sent out to who one matched with,
+    \item and the selected answers to survey questions.
+\end{itemize}
 
-\section{Spectrum Analysis}
+\section{Spectrum Creation / Analysis}
 Answers will be laid out on a spectrum, and this will allow for some easy math.
-This approach works because if a question has only two choices, then it implies
-that the two choices are polar opposites of each other. This will be perfectly
-represented with a large difference of 1 between adjacent choices. A question
-with two choices will have the biggest difference, and if Person A chooses the
-first choice and Person B chooses the second choice, the room for compatibility
-between the two decreases. A question with one hundred choices will have less
-of an impact, as differences between adjacent choices will only be 0.01.
+Questions with less choices imply that adjacent choices are more conflicting and
+indicative of incompatibility. However, questions with many more choices will
+have adjacent answer choices that have less of a difference between one
+another.
 
-\subsection{Q/A Formatting}
-Questions and answers will be formatted like the following example:
+\subsection{Spectrum Examples}
+A question with two choices will have the biggest difference, as if Person A chooses the
+first choice and Person B chooses the second choice, there is lower compatibility.
+On the other hand, a question with one hundred choices will have less of an
+impact, as differences between adjacent choices will only be 0.01. If Person A
+chooses the first choice and Person B chooses the second choice (right next to
+the first choice), then there is still a chance both can be very compatible.
+
+\subsection{Question Weights}
+Question weights can be included. These are multipliers. Multiplying a
+difference by a number greater than 1 exaggerates the difference. Multiplying a
+difference by a number less than 1 minimizes the difference. A difference that
+is exaggerated truly indicates incompatibility, while a difference that is
+minimized means that the answer to the question is mostly just for fun.
+
+The following format will accept question weights:
+
+\begin{verbatim}
+    (Decimal) [question]
+\end{verbatim}
+
+An opening parenthesis is the first character provided, with the decimal
+following it, and a closing parenthesis with a space before the question. This
+is to be as unambiguous as possible.
+
+\subsection{Output Format}
+The output of questions and answers will be formatted like the following
+example:
 
 \begin{verbatim}
     What animal do you like as a pet?
     Cats | Birds | Dogs
 \end{verbatim}
 
-Vertical bars will act as delimiters. Answers will be loaded from this format,
+Vertical bars will act as delimiters. Answers can be loaded from this format,
 and proposed answers will be submitted in this format. Ultimately, I will gather
 data from all the spectrums and create the most appropriate one.
 
-\subsection{Creating an interface for surveying content}
+\subsection{Creating the spectrum interface}
 Vanilla javascript and html should allow for dragging and dropping answers into
 a row, and javascript automatically sorts the answers. This interface will
 allow for ease of creating survey questions and submission of the answers.
 Collecting answers will be done before the matchmaking is open to everyone.
 
-Questions should be revised after they are made. Questions and answers can
-populate the form with a previous answer file. This allows for adding of
-answers and possible revision of the question. The survey form will be
-generated with nodejs. I will get diffs manually to accept revisions to the
-final version.
+Questions should be revised by others after they are made. Questions and answers
+can populate the form with a previous answer file. This allows for adding of
+answers and possible revision of the question.
 
-\section{Answering survey questions}
-Proposed spectrums will be compared and I will ultimately decide upon the best
-one for people to answer to.
+\section{Generation and Usage of the Survey}
+I will get diffs manually. Proposed spectrums will be compared and I will
+ultimately decide upon the best one for people to answer to.
 
-\subsection{Loading questions}
-As stated, this is the format:
-\begin{verbatim}
-    What animal do you like as a pet?
-    Cats | Birds | Dogs
-\end{verbatim}
-
-A simple html form will load up these sets of data and have users click their
-answer. This form will be generated on my machine.
+The survey form's metadata will be generated with nodejs on my own client. The
+additional vertically formatted survey is for ease of entering questions and
+answers into a Google Form.
 
 \subsection{Output of answers}
-Questions will be in the same order for every person. Additionally, the survey
-will have a final revision before it is released. Output is simply a list of
-numbers. The list of numbers will be the index of an answer for each question.
-This list of numbers will be in order, so question numbers will correspond.
+From the Google Sheet integrated with the Google Form, the index for each
+answer will need to be found from a Map. A list of indices will be made, and it
+should be in order so that questions correspond.
 
 \section{Data Computation}
-I will be using Java for data computation.
-First, the survey file will be read. The information needed is the number of
-answers for each question.
+I will be using Java for data computation. First, the survey file will be read.
+The information needed is the number of answers for each question, and each
+question's weight. The weights can be included in the file containing the list
+of numbers for each question.
 
 Then, each users' choice is an index of an answer for each question. The choice
 will have a calculated value that is the index divided by the difference between
 the number of answers and 1. Answer indices start at 0, so this will allow for
-answers on opposite ends of a spectrum to have a difference of 1.
-
-Users that participate first in the matchmaker will be prioritized. This can be
-done by making the file names alphabetical as Java will read the files
-alphabetically. The users created from the files are added to the queue in
-order.
+answers on opposite ends of a spectrum to have a difference of 1. Differences
+will then be multiplied by the weight of the question.
 
 \subsection{Data Output}
 The final data spreadsheet will be a table with each person's compatibility
 with one another. This spreadsheet will be kept private. CSVs are supported by
 regular sheet readers like Excel and Calc.
-
-It is probably one's best interest to just display matched results instead of
-giving out information regarding who one was most compatible with. Each
-individual will know whom he/she matched with after the stable matchmaking
-algorithm is applied.
 
 \end{document}

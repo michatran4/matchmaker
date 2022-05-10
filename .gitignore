@@ -1,5 +1,6 @@
 todo
 *.dat
+*.txt
 *.pdf
 *.gz
 node_modules
