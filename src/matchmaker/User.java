@@ -11,12 +11,10 @@ public class User {
     // please be careful with overriding mappings. maps just won't work
     // a set will and can have comparable elements
 
-    public User(String name, String[] answers) {
+    public User(String name, int[] answers) {
         this.name = name;
         this.answers = new int[answers.length];
-        for (int i = 0; i < answers.length; i++) {
-            this.answers[i] = Integer.parseInt(answers[i]);
-        }
+        System.arraycopy(answers, 0, this.answers, 0, answers.length);
         preferences = new TreeSet<>();
     }
 
@@ -88,7 +86,7 @@ public class User {
 
     public static class Preference implements Comparable<Preference> {
         private final double value;
-        public User user;
+        public final User user;
 
         public Preference(User u, double p) {
             user = u;

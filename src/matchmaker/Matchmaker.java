@@ -8,13 +8,10 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
-// TODO: use JSON for the name and answers
 public class Matchmaker {
-    private final HashMap<Integer, Integer> questions; // map of question number to number of answers
+    private final Question[] questions;
     private final LinkedList<User> users;
 
     /**
@@ -23,33 +20,68 @@ public class Matchmaker {
      * User data should be in one directory, with the name being the first line and the data
      * being the second.
      */
-    public Matchmaker(String surveyFile, String directory) throws IOException {
-        // make answer counts for each question
-        questions = new HashMap<>();
-        String list = Files.readString(Path.of(surveyFile), StandardCharsets.US_ASCII);
-        String[] counts = list.split(",");
-        for (int i = 0; i < counts.length; i++) {
-            questions.put(i, Integer.parseInt(counts[i]));
-        }
-        // create user objects from survey input
+    public Matchmaker(String surveyFile, String countsData, String surveyData) throws IOException {
+        int numQuestions = 5; // TODO
+        questions = new Question[numQuestions];
         users = new LinkedList<>();
-        try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
-            paths.filter(Files::isRegularFile).forEach(path -> {
-                try {
-                    String[] input = Files.readString(path, StandardCharsets.US_ASCII).split("\n");
-                    String name = input[0]; // name is the first line. TODO might change
-                    String[] answers = input[1].split(",");
-                    User user = new User(name, answers);
-                    users.add(user);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+        parseCSV(surveyFile, countsData, surveyData, numQuestions);
+    }
+
+    /**
+     * Creates user and question objects from the survey input.
+     *
+     * @param surveyFile   the survey questions and answers
+     * @param countsData   the count data to make questions properly
+     * @param surveyData   the csv from user input
+     * @param numQuestions the number of questions there are. The csv has questions in order, so
+     *                     the number of questions will help determine where the questions start,
+     *                     which will be after data like timestamps and emails.
+     */
+    private void parseCSV(String surveyFile, String countsData,
+                          String surveyData, int numQuestions) throws IOException {
+        // TODO document
+        String[] survey = Files.readString(Path.of(surveyFile), StandardCharsets.US_ASCII)
+                .split("\n\n"); // sets of questions and answers
+        survey = Arrays.stream(survey).filter(s -> s.contains("\n")).toArray(String[]::new);
+        // disregard sections. This needs to be paired up correctly with question creation
+        Scanner counts = new Scanner(Files.readString(Path.of(countsData), StandardCharsets.US_ASCII)
+                        .replace(",", " ")); // TODO should be weights
+        Scanner csv = new Scanner(new File(surveyData));
+        csv.nextLine();
+        int index = 0;
+        for (String question: survey) {
+            Scanner answers = new Scanner(question);
+            answers.nextLine();
+            double weight = 1.0;
+            String count = counts.next();
+            System.out.println(question + " " + count);
+            if (count.contains(":")) {
+                weight = Double.parseDouble(count.split(":")[0]);
+            }
+            questions[index++] = new Question(question, answers, weight);
         }
+        // now, initialize all users
+        while (csv.hasNextLine()) {
+            String[] answers = csv.nextLine().split(",");
+            int[] indices = new int[numQuestions];
+            int nameColumn = 1; // the column in the CSV data with the user's name
+            String name = answers[nameColumn];
+            // calculate the indices here, starting with where the questions start
+            index = 0;
+            for (int i = answers.length - numQuestions; i < answers.length; i++) {
+                Question question = questions[index];
+                int answer = question.getIndex(answers[i]);
+                indices[index++] = answer;
+            }
+            User user = new User(name, indices);
+            users.add(user);
+        }
+        System.out.println(users);
     }
 
     public static void main(String[] args) throws IOException {
-        Matchmaker mm = new Matchmaker("./data/survey.dat", "./data/users");
+        Matchmaker mm = new Matchmaker("./data/survey.txt", "./data/counts.dat",
+                "./data/forms.csv");
         mm.calculatePreferences();
         mm.write("data-out");
     }
@@ -68,17 +100,18 @@ public class Matchmaker {
                     BigDecimal average = new BigDecimal("0.0");
                     // average of differences. will be same for user pairs
                     // use big decimal for rounding to thousands
-                    for (int i = 0; i < questions.size(); i++) {
-                        int ans = questions.get(i); // number of answers for the question index
+                    for (int i = 0; i < questions.length; i++) {
+                        int ans = questions[i].getNumAnswers(); // number of answers for the question index
                         // calculate the value of each answer index, which will be used in a
                         // difference between two values
                         BigDecimal v = BigDecimal.valueOf((double) one.getAnswer(i) / (ans - 1));
                         BigDecimal v2 = BigDecimal.valueOf((double) two.getAnswer(i) / (ans - 1));
                         // floating points are definitely needed
                         BigDecimal diff = BigDecimal.valueOf(Math.abs(v.doubleValue() - v2.doubleValue()));
+                        diff = diff.multiply(BigDecimal.valueOf(questions[i].weight));
                         average = average.add(diff);
                     }
-                    BigDecimal preference = average.divide(BigDecimal.valueOf(questions.size()), 3,
+                    BigDecimal preference = average.divide(BigDecimal.valueOf(questions.length), 3,
                             RoundingMode.HALF_UP); // find the avg but scale to the thousandths
                     one.add(two, preference.doubleValue());
                     two.add(one, preference.doubleValue());
@@ -89,7 +122,6 @@ public class Matchmaker {
 
     /**
      * Writes the output: spreadsheet and individual data.
-     * TODO should individuals know who they were most compatible with before matching?
      *
      * @param directory the directory to write the files to
      */
@@ -145,7 +177,7 @@ public class Matchmaker {
             // remember that there are empty values for a user's preference for themselves;
             // the last user will have an extra comma on purpose
         }
-        System.out.println(csvBuilder);
+        //System.out.println(csvBuilder);
         File dir = new File(directory);
         if (!dir.exists()) {
             dir.mkdir();
@@ -185,6 +217,33 @@ public class Matchmaker {
             FileWriter writer = new FileWriter(file);
             writer.write(output.toString());
             writer.close();
+        }
+    }
+
+    private static class Question {
+        private final String question;
+        private final double weight;
+        private final HashMap<String, Integer> answers; // map of answer to its index
+
+        public Question(String question, Scanner answers, double weight) {
+            this.question = question;
+            this.answers = new HashMap<>();
+            while (answers.hasNextLine()) {
+                this.answers.put(answers.nextLine(), this.answers.size());
+            }
+            this.weight = weight;
+        }
+
+        public int getNumAnswers() {
+            return answers.size();
+        }
+
+        public int getIndex(String answer) {
+            return answers.get(answer);
+        }
+
+        public String toString() {
+            return question + ": " + answers;
         }
     }
 }
