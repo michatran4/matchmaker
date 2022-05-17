@@ -11,8 +11,10 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Matchmaker {
-    private final Question[] questions;
+    private Question[] questions;
     private final LinkedList<User> users;
+    private final HashMap<String, Integer> infoColumns;
+    // extra information columns that aren't questions. important data for user creation, though
 
     /**
      * Loads the survey and stores the number of answers to each question.
@@ -21,10 +23,15 @@ public class Matchmaker {
      * being the second.
      */
     public Matchmaker(String surveyFile, String countsData, String surveyData) throws IOException {
-        int numQuestions = 5; // TODO
-        questions = new Question[numQuestions];
         users = new LinkedList<>();
-        parseCSV(surveyFile, countsData, surveyData, numQuestions);
+        infoColumns = new HashMap<>();
+        // 0th column is the timestamp
+        infoColumns.put("email", 1);
+        infoColumns.put("name", 2);
+        infoColumns.put("id", 3);
+        infoColumns.put("private", 4);
+        infoColumns.put("public", 5);
+        parseCSV(surveyFile, countsData, surveyData);
     }
 
     /**
@@ -33,16 +40,13 @@ public class Matchmaker {
      * @param surveyFile   the survey questions and answers
      * @param countsData   the count data to make questions properly
      * @param surveyData   the csv from user input
-     * @param numQuestions the number of questions there are. The csv has questions in order, so
-     *                     the number of questions will help determine where the questions start,
-     *                     which will be after data like timestamps and emails.
      */
-    private void parseCSV(String surveyFile, String countsData,
-                          String surveyData, int numQuestions) throws IOException {
+    private void parseCSV(String surveyFile, String countsData, String surveyData) throws IOException {
         // TODO document
         String[] survey = Files.readString(Path.of(surveyFile), StandardCharsets.US_ASCII)
                 .split("\n\n"); // sets of questions and answers
         survey = Arrays.stream(survey).filter(s -> s.contains("\n")).toArray(String[]::new);
+        questions = new Question[survey.length];
         // disregard sections. This needs to be paired up correctly with question creation
         Scanner counts = new Scanner(Files.readString(Path.of(countsData), StandardCharsets.US_ASCII)
                         .replace(",", " ")); // TODO should be weights
@@ -63,17 +67,21 @@ public class Matchmaker {
         // now, initialize all users
         while (csv.hasNextLine()) {
             String[] answers = csv.nextLine().split(",");
-            int[] indices = new int[numQuestions];
-            int nameColumn = 1; // the column in the CSV data with the user's name
-            String name = answers[nameColumn];
+            int[] indices = new int[questions.length];
+            String name = answers[infoColumns.get("name")];
+            String email = answers[infoColumns.get("email")];
+            int id = Integer.parseInt(answers[infoColumns.get("id")]);
+            infoColumns.put("id", 3);
+            String priv = answers[infoColumns.get("private")];
+            String pub = answers[infoColumns.get("public")];
             // calculate the indices here, starting with where the questions start
             index = 0;
-            for (int i = answers.length - numQuestions; i < answers.length; i++) {
+            for (int i = answers.length - questions.length; i < answers.length; i++) {
                 Question question = questions[index];
                 int answer = question.getIndex(answers[i]);
                 indices[index++] = answer;
             }
-            User user = new User(name, indices);
+            User user = new User(name, email, id, priv, pub, indices);
             users.add(user);
         }
         System.out.println(users);
@@ -202,12 +210,15 @@ public class Matchmaker {
             dir.mkdir();
         }
         for (User user: users) {
-            File file = new File(directory + "/users/" + user.getName() + ".txt");
-            StringBuilder output = new StringBuilder("Your top matches are: \n");
+            File file = new File(directory + "/users/" + user.getId() + ".txt");
+            StringBuilder output = new StringBuilder("Your top matches are here!\n\n");
             int matches = 0;
             for (User.Preference preference: user.getPreferences()) {
                 if (matches < 3) {
-                    output.append(String.format("- %s\n", preference.user.getName()));
+                    output.append(
+                            String.format("%s\nContact Information:\n%s\n\n",
+                            preference.user.getName(), preference.user.getPub())
+                    );
                     matches++; // TODO inline when checking for gender preferences
                 }
                 else {

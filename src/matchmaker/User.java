@@ -5,14 +5,19 @@ import java.util.Objects;
 import java.util.TreeSet;
 
 public class User {
-    private final String name;
+    private final String name, email, priv, pub;
+    private final int id;
     private final int[] answers; // defined number of answers
     private final TreeSet<Preference> preferences; // contains avg. of differences for a person
     // please be careful with overriding mappings. maps just won't work
     // a set will and can have comparable elements
 
-    public User(String name, int[] answers) {
+    public User(String name, String email, int id, String priv, String pub, int[] answers) {
         this.name = name;
+        this.email = email;
+        this.id = id;
+        this.priv = priv;
+        this.pub = pub;
         this.answers = new int[answers.length];
         System.arraycopy(answers, 0, this.answers, 0, answers.length);
         preferences = new TreeSet<>();
@@ -20,6 +25,17 @@ public class User {
 
     public String getName() {
         return name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @return contact information to give to the matched users
+     */
+    public String getPub() {
+        return pub;
     }
 
     /**
@@ -33,7 +49,8 @@ public class User {
     }
 
     /**
-     * Determines if this user already has a preference calculated for the other user.
+     * Determines if this user already has a preference calculated for the other user with a
+     * linear search.
      * The preferences towards each other is the same, so no need to recalculate.
      *
      * @param user the other user
@@ -41,7 +58,7 @@ public class User {
      */
     public boolean preferenceExists(User user) {
         for (Preference preference: preferences) {
-            if (preference.user.name.equals(user.name)) {
+            if (preference.user.id == user.id) {
                 return true;
             }
         }
@@ -81,7 +98,7 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(name, user.name);
+        return Objects.equals(id, user.id);
     }
 
     public static class Preference implements Comparable<Preference> {
@@ -103,8 +120,8 @@ public class User {
         public int compareTo(Preference other) {
             if (Double.compare(value, other.value) == 0) {
                 // second comparator for tree set. include duplicate averages, but not names
-                // must have this or the tree set won't add it
-                return user.getName().compareTo(other.user.getName());
+                // must have this or the tree set won't add it. This doesn't matter too much
+                return Integer.compare(user.id, other.user.id);
             }
             return Double.compare(value, other.value);
         }
