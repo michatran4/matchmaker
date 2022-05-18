@@ -5,16 +5,15 @@ import java.util.Objects;
 import java.util.TreeSet;
 
 public class User {
-    private final String name, email, priv, pub;
+    private final String name, priv, pub;
     private final int id;
     private final int[] answers; // defined number of answers
     private final TreeSet<Preference> preferences; // contains avg. of differences for a person
     // please be careful with overriding mappings. maps just won't work
     // a set will and can have comparable elements
 
-    public User(String name, String email, int id, String priv, String pub, int[] answers) {
+    public User(String name, int id, String priv, String pub, int[] answers) {
         this.name = name;
-        this.email = email;
         this.id = id;
         this.priv = priv;
         this.pub = pub;

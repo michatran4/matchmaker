@@ -17,51 +17,39 @@ public class Matchmaker {
     // extra information columns that aren't questions. important data for user creation, though
 
     /**
-     * Loads the survey and stores the number of answers to each question.
-     * Then, creates User objects.
-     * User data should be in one directory, with the name being the first line and the data
-     * being the second.
+     * Loads the survey metadata and creates User objects.
      */
-    public Matchmaker(String surveyFile, String countsData, String surveyData) throws IOException {
+    public Matchmaker(String surveyFile, String weightsData, String surveyData,
+                      String headersFile) throws IOException {
         users = new LinkedList<>();
         infoColumns = new HashMap<>();
-        // 0th column is the timestamp
-        infoColumns.put("email", 1);
-        infoColumns.put("name", 2);
-        infoColumns.put("id", 3);
-        infoColumns.put("private", 4);
-        infoColumns.put("public", 5);
-        parseCSV(surveyFile, countsData, surveyData);
+        parseHeaders(headersFile);
+        parseCSV(surveyFile, weightsData, surveyData);
     }
 
     /**
      * Creates user and question objects from the survey input.
      *
      * @param surveyFile   the survey questions and answers
-     * @param countsData   the count data to make questions properly
+     * @param weightsData   the weight data to weigh questions properly
      * @param surveyData   the csv from user input
      */
-    private void parseCSV(String surveyFile, String countsData, String surveyData) throws IOException {
-        // TODO document
+    private void parseCSV(String surveyFile, String weightsData, String surveyData) throws IOException {
         String[] survey = Files.readString(Path.of(surveyFile), StandardCharsets.US_ASCII)
                 .split("\n\n"); // sets of questions and answers
         survey = Arrays.stream(survey).filter(s -> s.contains("\n")).toArray(String[]::new);
+        // disregard sections, only use questions/answers.
+        // This needs to be paired up correctly with question creation.
         questions = new Question[survey.length];
-        // disregard sections. This needs to be paired up correctly with question creation
-        Scanner counts = new Scanner(Files.readString(Path.of(countsData), StandardCharsets.US_ASCII)
-                        .replace(",", " ")); // TODO should be weights
+        Scanner weights = new Scanner(Files.readString(Path.of(weightsData),
+                StandardCharsets.US_ASCII));
         Scanner csv = new Scanner(new File(surveyData));
-        csv.nextLine();
+        csv.nextLine(); // columns disregarded
         int index = 0;
         for (String question: survey) {
             Scanner answers = new Scanner(question);
             answers.nextLine();
-            double weight = 1.0;
-            String count = counts.next();
-            System.out.println(question + " " + count);
-            if (count.contains(":")) {
-                weight = Double.parseDouble(count.split(":")[0]);
-            }
+            double weight = Double.parseDouble(weights.next());
             questions[index++] = new Question(question, answers, weight);
         }
         // now, initialize all users
@@ -69,7 +57,6 @@ public class Matchmaker {
             String[] answers = csv.nextLine().split(",");
             int[] indices = new int[questions.length];
             String name = answers[infoColumns.get("name")];
-            String email = answers[infoColumns.get("email")];
             int id = Integer.parseInt(answers[infoColumns.get("id")]);
             infoColumns.put("id", 3);
             String priv = answers[infoColumns.get("private")];
@@ -81,15 +68,25 @@ public class Matchmaker {
                 int answer = question.getIndex(answers[i]);
                 indices[index++] = answer;
             }
-            User user = new User(name, email, id, priv, pub, indices);
+            User user = new User(name, id, priv, pub, indices);
             users.add(user);
         }
-        System.out.println(users);
+    }
+
+    /**
+     * Parses the extra information needed for User creation.
+     * @param headersFile the file with the information for headers from the CSV file
+     */
+    private void parseHeaders(String headersFile) throws IOException {
+        Scanner scanner = new Scanner(new File(headersFile));
+        while (scanner.hasNext()) {
+            infoColumns.put(scanner.next(), scanner.nextInt());
+        }
     }
 
     public static void main(String[] args) throws IOException {
-        Matchmaker mm = new Matchmaker("./data/survey.txt", "./data/counts.dat",
-                "./data/forms.csv");
+        Matchmaker mm = new Matchmaker("./data/survey.txt", "./data/weights.dat",
+                "./data/forms.csv", "./data/headers.txt");
         mm.calculatePreferences();
         mm.write("data-out");
     }
@@ -202,7 +199,7 @@ public class Matchmaker {
     /**
      * Writes the matchmaker's results for individuals.
      * This is assumed to be used after the CSV is written. data-out should already be created.
-     * TODO contact information, and this should probably be a pretty HTML page
+     * TODO pretty HTML page
      */
     private void writeIndividuals(String directory) throws IOException {
         File dir = new File(directory + "/users");

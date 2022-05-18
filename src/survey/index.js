@@ -4,10 +4,10 @@
 
 const read = 'ans.dat'; // answer file to read from
 const write = 'survey.txt'; // survey file formatted
-const counts = 'counts.dat'; // survey answer counts file
+const counts = 'weights.dat'; // survey answer counts file
 const fs = require('fs');
 
-let countList = "";
+let weightList = "";
 let setList = "";
 
 /**
@@ -25,8 +25,8 @@ function getData() {
  */
 function writeFile() {
     fs.writeFile(write, setList, (e)=>{if (e) console.log(e)})
-    countList = countList.substring(0, countList.length - 1);
-    fs.writeFile(counts, countList, (e)=>{if (e) console.log(e)})
+    weightList = weightList.substring(0, weightList.length - 1);
+    fs.writeFile(counts, weightList, (e)=>{if (e) console.log(e)})
 }
 
 /**
@@ -42,10 +42,13 @@ async function generateHTML() {
             let answers = set.split("\n")[1].split(" | ");
             if (question.charAt(0) == '(') {
                 let decimal = question.substring(1, question.indexOf(')'));
-                countList += decimal + ":";
+                weightList += decimal;
                 question = question.substring(question.indexOf(" ") + 1);
             }
-            countList += answers.length + ",";
+            else {
+                weightList += "1.0";
+            }
+            weightList += " ";
 
             setList += question + "\n";
             answers.forEach(ans => {
