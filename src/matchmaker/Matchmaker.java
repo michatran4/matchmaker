@@ -58,8 +58,8 @@ public class Matchmaker {
             int[] indices = new int[questions.length];
             String name = answers[infoColumns.get("name")];
             int id = Integer.parseInt(answers[infoColumns.get("id")]);
-            infoColumns.put("id", 3);
-            String priv = answers[infoColumns.get("private")];
+            String gender = answers[infoColumns.get("gender")];
+            String email = answers[infoColumns.get("email")];
             String pub = answers[infoColumns.get("public")];
             // calculate the indices here, starting with where the questions start
             index = 0;
@@ -68,7 +68,7 @@ public class Matchmaker {
                 int answer = question.getIndex(answers[i]);
                 indices[index++] = answer;
             }
-            User user = new User(name, id, priv, pub, indices);
+            User user = new User(name, id, gender, email, pub, indices);
             users.add(user);
         }
     }
@@ -199,7 +199,6 @@ public class Matchmaker {
     /**
      * Writes the matchmaker's results for individuals.
      * This is assumed to be used after the CSV is written. data-out should already be created.
-     * TODO pretty HTML page
      */
     private void writeIndividuals(String directory) throws IOException {
         File dir = new File(directory + "/users");
@@ -208,20 +207,39 @@ public class Matchmaker {
         }
         for (User user: users) {
             File file = new File(directory + "/users/" + user.getId() + ".txt");
-            StringBuilder output = new StringBuilder("Your top matches are here!\n\n");
+            StringBuilder output = new StringBuilder(user.getEmail()+"\n\n");
+            output.append("Your top matches are here!\n\n");
+
+            output.append("Top Male Matches\n\n");
             int matches = 0;
             for (User.Preference preference: user.getPreferences()) {
-                if (matches < 3) {
+                if (matches < 3 && user.getGender().equals("Male")) {
                     output.append(
                             String.format("%s\nContact Information:\n%s\n\n",
                             preference.user.getName(), preference.user.getPub())
                     );
-                    matches++; // TODO inline when checking for gender preferences
+                    matches++;
                 }
                 else {
                     break;
                 }
             }
+
+            output.append("Top Female Matches\n\n");
+            matches = 0;
+            for (User.Preference preference: user.getPreferences()) {
+                if (matches < 3 && user.getGender().equals("Female")) {
+                    output.append(
+                            String.format("%s\nContact Information:\n%s\n\n",
+                                    preference.user.getName(), preference.user.getPub())
+                    );
+                    matches++;
+                }
+                else {
+                    break;
+                }
+            }
+
             FileWriter writer = new FileWriter(file);
             writer.write(output.toString());
             writer.close();

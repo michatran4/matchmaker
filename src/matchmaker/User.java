@@ -5,17 +5,18 @@ import java.util.Objects;
 import java.util.TreeSet;
 
 public class User {
-    private final String name, priv, pub;
+    private final String name, gender, email, pub;
     private final int id;
     private final int[] answers; // defined number of answers
     private final TreeSet<Preference> preferences; // contains avg. of differences for a person
     // please be careful with overriding mappings. maps just won't work
     // a set will and can have comparable elements
 
-    public User(String name, int id, String priv, String pub, int[] answers) {
+    public User(String name, int id, String gender, String email, String pub, int[] answers) {
         this.name = name;
         this.id = id;
-        this.priv = priv;
+        this.gender = gender;
+        this.email = email;
         this.pub = pub;
         this.answers = new int[answers.length];
         System.arraycopy(answers, 0, this.answers, 0, answers.length);
@@ -28,6 +29,17 @@ public class User {
 
     public int getId() {
         return id;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    /**
+     * @return email address for results to be sent to
+     */
+    public String getEmail() {
+        return email;
     }
 
     /**
