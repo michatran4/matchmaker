@@ -1,6 +1,6 @@
 \documentclass[12pt]{article}
 
-\title{matchmaker-tm}
+\title{matchmaker}
 \author{Michael Tran}
 \date{\today}
 
@@ -8,35 +8,27 @@
 \maketitle
 
 \section{Outline}
-This outlines the features that matchmaker-tm will have.
+This outlines the features of matchmaker.
 
 \subsection{Gathering Questions and Answers}
 People will be matched based on their responses to high quality questions. These
 questions will have at least two answers that can be distinctive of
 compatibility.
 
-Answers should be sorted on a spectrum. Those that choose the most left answer
-should be very incompatible with those that choose the most right answer. This
-could be subjective, so I will have this spectrum crowdsourced.
+Answers should be sorted on a spectrum. Those that choose the topmost answer
+should be very incompatible with those that choose the bottommost answer. This
+could be subjective, so all questions will be crowdsourced.
 
-The answers should be sortable on the spectrum. \textbf{The containers should
-not be sortable}; this will create conflicts between where the dragged object
-should be placed.
-
-\subsection{Representative Interface}
-Representatives will be allowed to edit the Google Form containing the survey.
-Representatives will authenticate survey partcipiants by allowing the user's
-student ID to have access to the survey. All questions will already be final at
-the time of the surveying. Users will have only one survey submission.
+All questions will already be final at the time of the surveying. Users will
+have only one survey submission.
 
 \subsection{Computing answers}
-After the matchmaker has been available to the public for a good amount of time
-and a solid amount of data is collected, each user will have their answers
+After the matchmaker closes submissions, each user will have their answers
 compared against other user's answers. Answers have a difference from 0 to
 1. A larger difference represents incompatibility, and a smaller difference
 represents compatibility. This is done by comparing where the answers are
-located on the spectrum. As stated, \textit{those that choose the most left answer
-should be very incompatible with those that choose the most right answer.}
+located on the spectrum. As stated, \textit{those that choose the topmost answer
+should be very incompatible with those that choose the bottommost answer.}
 
 However, one question isn't indicative of everything, so the averages of the
 differences are calculated and laid out onto a spreadsheet. A person that has a
@@ -52,32 +44,41 @@ In the survey form, each person will need to provide:
 \begin{itemize}
     \item one's name,
     \item one's student ID,
-    \item one's contact information for the matchmaker results to be reported to,
-    \item one's contact information to be sent out to who one matched with,
+    \item one's gender,
+    \item one's email for the matchmaker results to be reported to,
+    \item one's public contact information to be sent out to who one matched with,
     \item and the selected answers to survey questions.
 \end{itemize}
 
-\section{Spectrum Creation / Analysis}
-Answers will be laid out on a spectrum, and this will allow for some easy math.
-Questions with less choices imply that adjacent choices are more conflicting and
-indicative of incompatibility. However, questions with many more choices will
-have adjacent answer choices that have less of a difference between one
-another.
+\section{Survey Creation}
+Answers are thought of to be on a 'spectrum.' Questions with less choices imply
+that adjacent choices are more conflicting and indicative of incompatibility.
+However, questions with many more choices will have adjacent answer choices that
+have less of a difference between one another.
+
+\textbf{Questions cannot start with a parenthesis. These are reserved for adding
+weights to questions, later.}
 
 \subsection{Spectrum Examples}
-A question with two choices will have the biggest difference, as if Person A chooses the
-first choice and Person B chooses the second choice, there is lower compatibility.
-On the other hand, a question with one hundred choices will have less of an
-impact, as differences between adjacent choices will only be 0.01. If Person A
-chooses the first choice and Person B chooses the second choice (right next to
-the first choice), then there is still a chance both can be very compatible.
+A question with two choices will have the biggest difference, as if Person A
+chooses the first choice and Person B chooses the second choice, there is lower
+compatibility. On the other hand, a question with one hundred choices will have
+less of an impact, as differences between adjacent choices will only be 0.01. If
+Person A chooses the first choice and Person B chooses the second choice (right
+next to the first choice), then there is still a chance both can be very
+compatible.
 
 \subsection{Question Weights}
-Question weights can be included. These are multipliers. Multiplying a
-difference by a number greater than 1 exaggerates the difference. Multiplying a
+Question weights can be included to act as multipliers. Multiplying a difference
+by a number greater than 1 exaggerates the difference, while multiplying a
 difference by a number less than 1 minimizes the difference. A difference that
 is exaggerated truly indicates incompatibility, while a difference that is
 minimized means that the answer to the question is mostly just for fun.
+
+This means that if a question is truly indicative of compatibility, then it
+should have a weight that is greater than 1. However, if a question is mostly
+for fun, then it should have a weight less than 1. Else, the default weight is 1
+for a question and it doesn't need to be modified.
 
 The following format will accept question weights:
 
@@ -95,29 +96,21 @@ example:
 
 \begin{verbatim}
     What animal do you like as a pet?
-    Cats | Birds | Dogs
+    Cats
+    Birds
+    Dogs
+
+    What is your favorite type of number?
+    Even
+    Odd
 \end{verbatim}
 
-Vertical bars will act as delimiters. Answers can be loaded from this format,
-and proposed answers will be submitted in this format. Ultimately, I will gather
-data from all the spectrums and create the most appropriate one.
-
-\subsection{Creating the spectrum interface}
-Vanilla javascript and html should allow for dragging and dropping answers into
-a row, and javascript automatically sorts the answers. This interface will
-allow for ease of creating survey questions and submission of the answers.
-Collecting answers will be done before the matchmaking is open to everyone.
-
-Questions should be revised by others after they are made. Questions and answers
-can populate the form with a previous answer file. This allows for adding of
-answers and possible revision of the question.
+The matchmaker organizer will determine the most appropriate questions and
+answers and their ordering.
 
 \section{Generation and Usage of the Survey}
-I will get diffs manually. Proposed spectrums will be compared and I will
-ultimately decide upon the best one for people to answer to.
-
-The survey form's metadata will be generated with nodejs on my own client. This
-metadata will need to be moved into a directory for matchmaking.
+The survey form's metadata will be generated with nodejs on the organizer's
+client. This metadata will need to be moved into a directory for matchmaking.
 
 \subsection{Output of answers}
 From the Google Sheet integrated with the Google Form, the index for each
@@ -126,22 +119,25 @@ should be in order so that questions correspond.
 
 Header information should also be specified. The CSV file may have headers in
 different columns depending on who creates the survey. Have a file specifying
-it so the extra data can be parsed appropriately.
+it so the data regarding identity can be parsed appropriately.
 
 \section{Data Computation}
-I will be using Java for data computation. First, the survey file will be read.
+Java will be used for data computation. First, the survey file will be read.
 The information needed is the number of answers for each question. Then, the
 weights file will be read indicating each question's weight.
 
-Each users' choice is an index of an answer for each question. The choice
-will have a calculated value that is the index divided by the difference between
-the number of answers and 1. Answer indices start at 0, so this will allow for
+Each users' choice is an index of an answer for each question. The choice will
+have a calculated value that is the index divided by the difference between the
+number of answers and 1. Answer indices start at 0, so this will allow for
 answers on opposite ends of a spectrum to have a difference of 1. Differences
 will then be multiplied by the weight of the question.
 
 \subsection{Data Output}
-The final data spreadsheet will be a table with each person's compatibility
-with one another. This spreadsheet will be kept private. CSVs are supported by
+The final data spreadsheet will be a table with each person's compatibility with
+one another. This spreadsheet will be kept private. CSVs are supported by
 regular sheet readers like Excel and Calc.
+
+In addition, individuals' results will be saved to separate files that can be
+sent out.
 
 \end{document}

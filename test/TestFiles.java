@@ -14,38 +14,34 @@ public class TestFiles {
     /**
      * Validates the survey data file that has sets, each containing one question and multiple
      * answers.
-     * This should be done before survey file generation to prove the answer file was concatenated
-     * properly.
-     * Questions shouldn't be empty, and answers should not be empty or have a vertical bar.
+     * Questions and answers cannot be empty.
      */
     @Test
     public void testSurveyData() throws IOException { // Test splits
-        String file = "src/survey/create/ans.dat"; // file that sets are in
+        String file = "data/survey.txt"; // file that sets are in
         String content = Files.readString(Path.of(file), StandardCharsets.US_ASCII);
         String[] sets = content.split("\n\n");
-        for (String s: sets) {
-            assertTrue(s.contains("\n")); // test all sets separate the question and answers with \n
-            String question = s.split("\n")[0];
-            String answers = s.split("\n")[1];
-            assertTrue(question.trim().length() > 0); // make sure questions aren't empty
-            for (String a: answers.split(" \\| ")) { // make sure answers aren't empty
-                assertTrue(a.trim().length() > 0);
+        for (String set: sets) {
+            assertTrue(set.contains("\n")); // test if set has a newline
+            for (String s: set.split("\n")) { // make sure questions/answers aren't empty
+                assertTrue(s.trim().length() > 0);
             }
+            assertTrue(set.split("\n").length >= 3); // at least one question and 2 answers
         }
     }
 
     /**
-     * Validates the list of answer counts for survey questions.
+     * Validates the list of survey question weights.
      */
     @Test
-    public void testSurveyCounts() throws IOException {
-        String file = "data/survey.dat"; // file that has the list of counts
+    public void testSurveyWeights() throws IOException {
+        String file = "data/weights.dat"; // file that has the list of counts
         String content = Files.readString(Path.of(file), StandardCharsets.US_ASCII);
-        String[] counts = content.split(",");
+        String[] counts = content.split(" ");
         for (String number: counts) {
-            assertTrue(number.trim().length() > 0); // make sure counts are proper
-            int num = Integer.parseInt(number);
-            assertTrue(num >= 2); // questions should have at least 2 answers each
+            assertTrue(number.trim().length() > 0); // nonempty weight
+            double num = Double.parseDouble(number);
+            assertTrue(num > 0); // valid weight
         }
     }
 

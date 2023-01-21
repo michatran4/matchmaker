@@ -37,9 +37,6 @@ public class Matchmaker {
     private void parseCSV(String surveyFile, String weightsData, String surveyData) throws IOException {
         String[] survey = Files.readString(Path.of(surveyFile), StandardCharsets.US_ASCII)
                 .split("\n\n"); // sets of questions and answers
-        survey = Arrays.stream(survey).filter(s -> s.contains("\n")).toArray(String[]::new);
-        // disregard sections, only use questions/answers.
-        // This needs to be paired up correctly with question creation.
         questions = new Question[survey.length];
         Scanner weights = new Scanner(Files.readString(Path.of(weightsData),
                 StandardCharsets.US_ASCII));
@@ -56,7 +53,9 @@ public class Matchmaker {
         while (csv.hasNextLine()) {
             String[] answers = csv.nextLine().split(",");
             int[] indices = new int[questions.length];
-            String name = answers[infoColumns.get("name")];
+            String firstName = answers[infoColumns.get("first")];
+            String lastName = answers[infoColumns.get("last")];
+            String name = firstName + " " + lastName;
             int id = Integer.parseInt(answers[infoColumns.get("id")]);
             String gender = answers[infoColumns.get("gender")];
             String email = answers[infoColumns.get("email")];
@@ -101,7 +100,6 @@ public class Matchmaker {
         for (User one: users) {
             for (User two: users) {
                 if (one != two && !one.preferenceExists(two)) {
-                    // TODO: don't calculate preferences for the same gender
                     BigDecimal average = new BigDecimal("0.0");
                     // average of differences. will be same for user pairs
                     // use big decimal for rounding to thousands
@@ -213,12 +211,14 @@ public class Matchmaker {
             output.append("Top Male Matches\n\n");
             int matches = 0;
             for (User.Preference preference: user.getPreferences()) {
-                if (matches < 3 && user.getGender().equals("Male")) {
-                    output.append(
-                            String.format("%s\nContact Information:\n%s\n\n",
-                            preference.user.getName(), preference.user.getPub())
-                    );
-                    matches++;
+                if (matches < 3) {
+                    if (preference.user.getGender().equals("Male")) {
+                        output.append(
+                                String.format("%s\nContact Information:\n%s\n\n",
+                                        preference.user.getName(), preference.user.getPub())
+                        );
+                        matches++;
+                    }
                 }
                 else {
                     break;
@@ -228,13 +228,16 @@ public class Matchmaker {
             output.append("Top Female Matches\n\n");
             matches = 0;
             for (User.Preference preference: user.getPreferences()) {
-                if (matches < 3 && user.getGender().equals("Female")) {
-                    output.append(
-                            String.format("%s\nContact Information:\n%s\n\n",
-                                    preference.user.getName(), preference.user.getPub())
-                    );
-                    matches++;
+                if (matches < 3) {
+                    if (preference.user.getGender().equals("Female")) {
+                        output.append(
+                                String.format("%s\nContact Information:\n%s\n\n",
+                                        preference.user.getName(), preference.user.getPub())
+                        );
+                        matches++;
+                    }
                 }
+
                 else {
                     break;
                 }
