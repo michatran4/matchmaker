@@ -80,8 +80,10 @@ question should be separated with a space. For a question that heavily determine
 put a weight greater than 1.0; for a question that lightly determines compatibility (if it's for 
 fun), put a weight less than 1.0.
 
-Finally, head to the latest release from [my repository](https://github.com/michatran4/matchmaker). 
-Download the compiled binary for the metadata extractor. Optionally, you can compile this
+Finally, head to the latest releases for this repository:
+https://github.com/michatran4/matchmaker/releases. 
+Download the appropriate compiled binary for the metadata extractor.
+Optionally, you can compile this
 [(`src/metadata/index.js`)](https://raw.githubusercontent.com/michatran4/matchmaker/master/src/metadata/index.js)
  on your own with [pkg](https://www.npmjs.com/package/pkg).
 
