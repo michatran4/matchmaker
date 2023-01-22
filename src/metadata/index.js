@@ -1,5 +1,5 @@
 /**
- * Extracts question weight data after the Google Apps Script exports the Google Form.
+ * Extracts question weight data from the survey draft.
  * This also writes to a specified directory so that the main Matchmaker can run properly.
  */
 
@@ -33,7 +33,7 @@ function getData(filePath) {
     if (/\s$/.test(data)) {
         data = data.substring(0, data.length - 1); // remove extra newline at the bottom
     }
-    return data.split("\n\n"); // sets are separated by 2 newlines
+    return data.split("\r\n\r\n\r\n"); // sets n Google Docs are separated by these
 }
 
 /**
@@ -54,7 +54,9 @@ const main = async () => {
     let surveyFile = await input("Absolute file path to the survey file with weights included: ");
     let rootDir = await input("Absolute file path to the root directory of the matchmaker: ");
     let data = getData(surveyFile);
+    data = data.filter(set => set.includes("\n")); // get rid of sections, which are just single lines
     data.forEach(set => { // 'set' of questions and answers; connected by newlines
+        set = set.replace("/\r/g", ""); // remove all \r, keeping the \n for the extracted survey.txt file
         // add the weight of the question to the weight metadata
         let question = set.split("\n")[0];
         if (question.charAt(0) == '(') {
