@@ -63,52 +63,19 @@ Here's an example:
     No
 
 ### Converting the Google Doc to a Google Form
-Before populating the Google Form with the survey draft from the Google
-Doc, some settings should be enabled and some questions pertaining to identity
-should be asked.
-
-#### Form requirements
-The following settings on the Google Form need to be enabled:
-- Responses > Allow response editing
-- Responses > Limit to 1 response
-- (Optional) Responses > Restrict to users in Cypress-Fairbanks ISD and its trusted organizations
-- (Optional) Responses > Collect email addresses
-- Question defaults > Make questions required by default
-
-The following screening questions need to be asked:
-- What's your first name?
-  - Short answer text
-  - Response validation (regex): `[A-Z][a-z]+`
-- What's your last name?
-  - Short answer text
-  - Response validation (regex): `[A-Z][a-z]+`
-- Enter your student ID without the S in front.
-  - Short answer text
-  - Response validation: `Number Between 100000 and 999999`
-- What's your gender?
-  - Multiple choice: Male, Female
-- Provide your personal email.
-  - Short answer text
-- Provide your public contact information for your matches to connect with you.
-  - Short answer text
-
-Then, add a section and add questions for the survey. Customize and format appropriately.
-
-#### Google Doc to Google Form Conversion
 - Head to [converter.gs](https://raw.githubusercontent.com/michatran4/matchmaker/master/src/converter/converter.gs)
 for the script that converts the Google Doc into a Google Form.
 - Visit https://script.google.com/home/start and create a new project. Make sure
-you are signed in to a Google account with access to the survey form.
+you are signed in to the correct Google account.
 - Paste `converter.gs` into the development environment.
-- Replace DOC-ID in line 4 with the Google Doc ID in the URL bar.
+- Replace DOC-ID in line 5 with the Google Doc ID in the URL bar.
   - The document ID is located here: `docs.google.com/document/d/DOC-ID-HERE/edit`
-- Replace FORM-ID in line 5 with the Google Form ID in the URL bar when accessed
-in editor mode.
-  - The form ID is located here: `docs.google.com/forms/d/FORM-ID-HERE/edit`
 - Save the project with `CTRL+S`.
 - Click the `Run` button to run the main function. Give permissions if
 requested. If it errors, try another browser.
-- Your Google Form should now be populated with the Google Doc.
+- You should now have a created Google Form with questions from the Google Doc.
+The link is logged in the console.
+- Edit descriptions of any items if you wish.
 
 ### Metadata Extraction
 Download the Google Doc as a text file. Note its absolute path once saved.

@@ -1,18 +1,75 @@
 /**
  * Converter that takes formatted sections, questions, and answers from a Google Doc and turns it into a Google Form.
+ * This automatically creates a Google Form for you and logs the link for you to edit and view.
  */
 let docId = 'DOC-ID'; // Google Docs with the questions/answers and sections
-let formId = 'FORM-ID'; // the Google Form to populate
 function main() {
+    // Google Form Auto Creator
+    var form = FormApp.create('Matchmaker Survey');
+    form.setTitle("Matchmaker Survey");
+    form.setDescription('This is the survey for the matchmaker fundraiser.')
+    form.setAllowResponseEdits(true); // if the user decides to edit their response
+    form.setLimitOneResponsePerUser(true); // only one response per person
+    form.setRequireLogin(true); // Restrict to users in the organization
+    form.setCollectEmail(true); // Collect email addresses
+
+    var nameValidation = FormApp.createTextValidation()
+        .requireTextContainsPattern("[A-Z][a-z]+")
+        .setHelpText("Invalid name.")
+        .build();
+
+    form.addTextItem()
+        .setTitle("What's your first name?")
+        .setValidation(nameValidation)
+        .setRequired(true);
+
+    form.addTextItem()
+        .setTitle("What's your last name?")
+        .setValidation(nameValidation)
+        .setRequired(true);
+
+    var idValidation = FormApp.createTextValidation()
+        .requireNumberBetween(100000, 999999)
+        .setHelpText('Invalid student ID.')
+        .build();
+    form.addTextItem()
+        .setTitle("Enter your student ID without the S in front.")
+        .setValidation(idValidation)
+        .setRequired(true);
+
+    var gender = form.addMultipleChoiceItem();
+    gender.setTitle("What's your gender?");
+    gender.setChoices([
+        gender.createChoice('Male'),
+        gender.createChoice('Female')
+    ]);
+    gender.setRequired(true);
+
+    var emailValidation = FormApp.createTextValidation()
+        .requireTextContainsPattern("^[^\s@]+@[^\s@]+\.[^\s@]+$")
+        .setHelpText('Invalid email.')
+        .build();
+    form.addTextItem()
+        .setTitle("Provide your personal email.")
+        .setValidation(emailValidation)
+        .setRequired(true);
+
+    form.addParagraphTextItem()
+        .setTitle("Provide your public contact information for your matches to connect with you.")
+        .setRequired(true);
+
+    form.addPageBreakItem().setTitle('Questions');
+
+    // Google Doc to Google Form Conversion
     var doc = DocumentApp.openById(docId);
     let content = doc.getBody().getText();
     content = content.trim().split("\n\n"); // remove trailing newlines
 
-    var form = FormApp.openById(formId);
     for (let i = 0; i < content.length; i++) {
         if (content[i].includes("\n")) { // has questions and answers
             var split = content[i].split("\n");
             var question = form.addMultipleChoiceItem();
+            question.setRequired(true);
 
             // format the question title to remove weights if it has one
             var title = split[0];
@@ -33,4 +90,7 @@ function main() {
             var title = section.getTitle(); // TODO: The API is really dumb so this ensures that the title is filled in
         }
     }
+
+    Logger.log('Editor URL: ' + form.getEditUrl());
+    Logger.log('Published URL: ' + form.getPublishedUrl());
 }
