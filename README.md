@@ -23,19 +23,22 @@ Create a survey draft with [Google Docs](https://docs.google.com/).
 There should be sections and questions/answers formatted like the following:
 
     School-related questions
+    These are questions about school!
 
     What is your favorite subject?
     English
     Math
 
     Life-related questions
+    These are questions about your lifestyle.
 
     Do you exercise?
     Yes
     No
 
-- All sections and questions should be separated by a newline. 
+- All sections and questions should be separated by a newline.
 - Answers and questions should be grouped together with no newline.
+- Sections must have a single line description that is the following line.
 - **Questions cannot start with a parenthesis, and they should not be numbered.**
 - There should be at least two answers per question.
 
@@ -75,7 +78,8 @@ you are signed in to the correct Google account.
 requested. If it errors, try another browser.
 - You should now have a created Google Form with questions from the Google Doc.
 The link is logged in the console.
-- Edit descriptions of any items if you wish.
+- Double check all questions. Generation will mess up if items were copied
+and pasted incorrectly instead of typed originally.
 
 ### Metadata Extraction
 Download the Google Doc as a text file. Note its absolute path once saved.

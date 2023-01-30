@@ -27,6 +27,10 @@ function main() {
         .setTitle("What's your last name?")
         .setValidation(nameValidation)
         .setRequired(true);
+    
+    form.addTextItem()
+        .setTitle("Who is your representative (who collected your survey fee)?")
+        .setRequired(true);
 
     var idValidation = FormApp.createTextValidation()
         .requireNumberBetween(100000, 999999)
@@ -66,8 +70,8 @@ function main() {
     content = content.trim().split("\n\n"); // remove trailing newlines
 
     for (let i = 0; i < content.length; i++) {
-        if (content[i].includes("\n")) { // has questions and answers
-            var split = content[i].split("\n");
+        var split = content[i].split("\n");
+        if (split.length > 2) { // questions must have at least 2 answers
             var question = form.addMultipleChoiceItem();
             question.setRequired(true);
 
@@ -84,10 +88,10 @@ function main() {
             }
             question.setChoices(choices); // add the choices to the question
         }
-        else { // it is a section
+        else { // it is a section if there's a single line description following it
             var section = form.addSectionHeaderItem(); // create the section
-            section.setTitle(content[i]); // add title
-            var title = section.getTitle(); // TODO: The API is really dumb so this ensures that the title is filled in
+            section.setTitle(split[0]); // add title
+            section.setHelpText(split[1]); // add description
         }
     }
 
