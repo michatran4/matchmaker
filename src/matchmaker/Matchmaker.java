@@ -13,56 +13,55 @@ import java.util.*;
 public class Matchmaker {
     private Question[] questions;
     private final LinkedList<User> users;
-    private final HashMap<String, Integer> infoColumns;
     // extra information columns that aren't questions. important data for user creation, though
 
     /**
      * Loads the survey metadata and creates User objects.
      */
-    public Matchmaker(String surveyFile, String weightsData, String surveyData,
-                      String headersFile) throws IOException {
+    public Matchmaker(String surveyFile, String weightsData, String surveyData) throws IOException {
         users = new LinkedList<>();
-        infoColumns = new HashMap<>();
-        parseHeaders(headersFile);
         parseCSV(surveyFile, weightsData, surveyData);
     }
 
     /**
      * Creates user and question objects from the survey input.
      *
-     * @param surveyFile   the survey questions and answers
-     * @param weightsData   the weight data to weigh questions properly
-     * @param surveyData   the csv from user input
+     * @param surveyFile  the survey questions and answers
+     * @param weightsData the weight data to weigh questions properly
+     * @param surveyData  the tsv from user input
      */
     private void parseCSV(String surveyFile, String weightsData, String surveyData) throws IOException {
-        String[] survey = Files.readString(Path.of(surveyFile), StandardCharsets.US_ASCII)
+        String[] survey = Files.readString(Path.of(surveyFile))
                 .split("\n\n"); // sets of questions and answers
         questions = new Question[survey.length];
         Scanner weights = new Scanner(Files.readString(Path.of(weightsData),
                 StandardCharsets.US_ASCII));
-        Scanner csv = new Scanner(new File(surveyData));
-        csv.nextLine(); // columns disregarded
+        Scanner tsv = new Scanner(new File(surveyData));
+        tsv.nextLine();
         int index = 0;
-        for (String question: survey) {
-            Scanner answers = new Scanner(question);
-            answers.nextLine();
+        for (String set: survey) {
+            Scanner answers = new Scanner(set);
+            String question = answers.nextLine();
             double weight = Double.parseDouble(weights.next());
             questions[index++] = new Question(question, answers, weight);
         }
         // now, initialize all users
-        while (csv.hasNextLine()) {
-            String[] answers = csv.nextLine().split(",");
-            int[] indices = new int[questions.length];
-            String firstName = answers[infoColumns.get("first")];
-            String lastName = answers[infoColumns.get("last")];
+        while (tsv.hasNextLine()) {
+            String[] answers = tsv.nextLine().split("\t");
+            int[] indices = new int[questions.length]; // holds the user's indices to answers
+
+            // extract information from the appropriate columns, column indices start at 0
+            String firstName = answers[2];
+            String lastName = answers[3];
             String name = firstName + " " + lastName;
-            int id = Integer.parseInt(answers[infoColumns.get("id")]);
-            String gender = answers[infoColumns.get("gender")];
-            String email = answers[infoColumns.get("email")];
-            String pub = answers[infoColumns.get("public")];
-            // calculate the indices here, starting with where the questions start
+            int id = Integer.parseInt(answers[5]);
+            String gender = answers[6];
+            String email = answers[7];
+            String pub = answers[8];
+
+            // calculate the answer indices for a user here, starting with where the questions start
             index = 0;
-            for (int i = answers.length - questions.length; i < answers.length; i++) {
+            for (int i = 9; i < answers.length; i++) {
                 Question question = questions[index];
                 int answer = question.getIndex(answers[i]);
                 indices[index++] = answer;
@@ -72,20 +71,9 @@ public class Matchmaker {
         }
     }
 
-    /**
-     * Parses the extra information needed for User creation.
-     * @param headersFile the file with the information for headers from the CSV file
-     */
-    private void parseHeaders(String headersFile) throws IOException {
-        Scanner scanner = new Scanner(new File(headersFile));
-        while (scanner.hasNext()) {
-            infoColumns.put(scanner.next(), scanner.nextInt());
-        }
-    }
-
     public static void main(String[] args) throws IOException {
         Matchmaker mm = new Matchmaker("./data/survey.txt", "./data/weights.dat",
-                "./data/forms.csv", "./data/headers.txt");
+                "./data/forms.tsv");
         mm.calculatePreferences();
         mm.write("data-out");
     }
@@ -205,8 +193,7 @@ public class Matchmaker {
         }
         for (User user: users) {
             File file = new File(directory + "/users/" + user.getId() + ".txt");
-            StringBuilder output = new StringBuilder(user.getEmail()+"\n\n");
-            output.append("Your top matches are here!\n\n");
+            StringBuilder output = new StringBuilder("Email to: " + user.getEmail() + "\n\n");
 
             output.append("Top Male Matches\n\n");
             int matches = 0;

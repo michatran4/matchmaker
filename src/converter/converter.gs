@@ -49,13 +49,14 @@ function main() {
     ]);
     gender.setRequired(true);
 
-    var emailValidation = FormApp.createTextValidation()
-        .requireTextContainsPattern("^[^\s@]+@[^\s@]+\.[^\s@]+$")
+    /*var emailValidation = FormApp.createTextValidation()
+        .requireTextContainsPattern("^([A-Z|a-z|0-9](\.|_){0,1})+[A-Z|a-z|0-9]\@([A-Z|a-z|0-9])+((\.){0,1}[A-Z|a-z|0-9]){2}\.[a-z]{2,3}$")
         .setHelpText('Invalid email.')
         .build();
+    */
     form.addTextItem()
         .setTitle("Provide your personal email.")
-        .setValidation(emailValidation)
+        //.setValidation(emailValidation)
         .setRequired(true);
 
     form.addParagraphTextItem()
@@ -67,9 +68,12 @@ function main() {
     // Google Doc to Google Form Conversion
     var doc = DocumentApp.openById(docId);
     let content = doc.getBody().getText();
-    content = content.trim().split("\n\n"); // remove trailing newlines
+    // remove trailing newlines, and fix some copy pasting errors
+    content = content.trim().replaceAll("\r", "\n")
+        .split("\n\n"); // split everything into sets
 
     for (let i = 0; i < content.length; i++) {
+        content[i] = content[i].trim(); // just in case there are accidental newlines
         var split = content[i].split("\n");
         if (split.length > 2) { // questions must have at least 2 answers
             var question = form.addMultipleChoiceItem();
@@ -88,13 +92,23 @@ function main() {
             }
             question.setChoices(choices); // add the choices to the question
         }
-        else { // it is a section if there's a single line description following it
+        else if (split.length == 2) { // it is a section if there's a single line description following it
             var section = form.addSectionHeaderItem(); // create the section
             section.setTitle(split[0]); // add title
             section.setHelpText(split[1]); // add description
         }
+        else {
+            throw new Error("Splitting error with newline characters.");
+        }
     }
+
+    // Automatically create the spreadsheet so column indices can be hardcoded.
+    // If it's created upon the form creation, then form questions can't move
+    // around, so the data in columns should keep its integrity.
+    var ss = SpreadsheetApp.create('Matchmaker Survey (Responses)');
+    form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
 
     Logger.log('Editor URL: ' + form.getEditUrl());
     Logger.log('Published URL: ' + form.getPublishedUrl());
+    Logger.log('Spreadsheet URL: ' + ss.getUrl());
 }

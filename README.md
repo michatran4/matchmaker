@@ -13,9 +13,8 @@ Compile `docs/matchmaker.tex`.
 3. [Extract metadata for the primary Matchmaker program.](#metadata-extraction)
 4. [Gather survey data.](#collecting-surveys)
 5. [After gathering survey data, access and download the Google Sheets.](#google-sheets-data)
-6. [Create the headers file and label the important headers of the data.](#specifying-csv-headers)
-7. [Run the matchmaking analysis.](#matchmaker-analysis)
-8. [Send out the results.](#sending-out-results)
+6. [Run the matchmaking analysis.](#matchmaker-analysis)
+7. [Send out the results.](#sending-out-results)
 
 ### Creating the survey
 Create a survey draft with [Google Docs](https://docs.google.com/).
@@ -100,28 +99,13 @@ Representatives should log names, student IDs, and provide the link to the surve
 running the matchmaker, entries will be verified to see if they paid for the service.
 
 ### Google Sheets Data
-Head to the Responses tab of the Google Form in editor mode, and click the green Google Sheets 
-icon. This will create the spreadsheet.
+Head to the Responses tab of the Google Form in editor mode, and click the 'View in Sheets' button.
 
-Then, download the responses as .csv file. Rename the file to `forms.csv` and place it in 
-`data/`. There should already be the other extracted metadata files `survey.txt` and `weights.dat`.
+Then, download the responses as .tsv file. Rename the file to `forms.tsv` and place it in 
+`data/`. Some questions may include commas, so a tsv is used instead of a csv.
+There should already be the other extracted metadata files `survey.txt` and `weights.dat`.
 
-### Specifying CSV headers
-The matchmaker needs a bit of help with knowing what information is what for the form questions 
-that don't contribute to the actual matchmaking, like name etc.
-
-There should be a file, `data/headers.txt`, specifying column indices for
-headers. Each line in the file should point a header label to an index for the
-column where the info can be found.
-- Example: `name 1`
-
-The following header information needs to be specified:
-- first (One's first name)
-- last (One's last name)
-- id (One's unique student ID)
-- gender (One's gender)
-- email (One's private email for the CS club to contact and send results to)
-- public (One's public contact information to give to matched people)
+Don't move around columns in the spreadsheet, because it is hardcoded in `Matchmaker.java`.
 
 ### Matchmaker Analysis
 The most preferable IDE would be IntelliJ IDEA Community Edition. Run 

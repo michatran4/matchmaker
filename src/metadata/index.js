@@ -33,7 +33,7 @@ function getData(filePath) {
     if (/\s$/.test(data)) {
         data = data.substring(0, data.length - 1); // remove extra newline at the bottom
     }
-    return data.split("\r\n\r\n\r\n"); // sets n Google Docs are separated by these
+    return data.split("\r\n\r\n\r\n"); // sets in Google Docs are separated by these
 }
 
 /**
@@ -54,7 +54,12 @@ const main = async () => {
     let surveyFile = await input("Absolute file path to the survey file with weights included: ");
     let rootDir = await input("Absolute file path to the root directory of the matchmaker: ");
     let data = getData(surveyFile);
-    data = data.filter(set => set.includes("\n")); // get rid of sections, which are just single lines
+    data = data.filter(set => set.trim().split("\r\n").length >= 3); // trim() for excess newlines
+    /*
+        keep questions and answers, get rid of sections
+        questions have at least 2 answers, so there should be 3 lines per question/answer set
+        however, sections only have a description, so at most they are 2 line sets
+    */
     data.forEach(set => { // 'set' of questions and answers; connected by newlines
         set = set.replace("/\r/g", ""); // remove all \r, keeping the \n for the extracted survey.txt file
         // add the weight of the question to the weight metadata
